@@ -37,10 +37,13 @@ def decode_input(payload: dict, raw: str | None) -> dict | None:
     if raw is None:
         return None
     try:
-        return {**payload, "input": json.loads(raw)}
+        parsed = json.loads(raw)
+        if not isinstance(parsed, (dict, list)):
+            raise ValueError("Queued input is not a JSON object or array.")
     except (TypeError, ValueError):
         logger.warning("Invalid queued input payload %s.", payload.get("id"))
         return None
+    return {**payload, "input": parsed}
 
 
 async def discard_input(bus: "MessageBus", payload: dict) -> None:
